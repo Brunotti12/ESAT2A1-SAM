@@ -17,19 +17,20 @@ def get_local_ip_and_subnet():
 def get_ip_and_mac():
     local_ip = get_local_ip_and_subnet()
     subnet = '.'.join(local_ip.split('.')[:-1]) + '.1/24' #deze lijn bepaalt over welk netwerk we de scan willen doen; hier: het HELE ('.1/24') lokale netwerk waar we zelf op zitten (en dus eerst op zijn ingebroken)
-
+    print("CP1")
     arp_request = ARP(pdst=subnet)  #dit scant voor target IP adressen
     ethernet_frame = Ether(dst='ff:ff:ff:ff:ff:ff') #maakt een ethernet frame met als destination het 'broadcast adress' (='ff:ff:ff:ff:ff:ff'), dit is een speciaal MAC adres waar ALLE devices op een netwerk naar luisteren
     packet = broadcast / arp_request #combineert het frame met de request
-
+    print("CP2")
     answers_list = srp(packet, timeout=20, verbose=False)[0] #srp --> Send and Receive Packets
     result=[]
-
+    print("CP3")
     print("IP\t\t\tMAc adress\n------------------------------------------")
     for element in answers_list: #loop over alle packets met antwoorden; 'element' is dan een lijst met eerst de verzonden info, dan de ontvangen antwoorden
         if element[1].psrc != local_ip:  # deze lijn zorgt ervoor dat de packets die van ons eigen device komen genegeerd worden (.psrc neemt het IP adress van waar de data komt)
             print(element[1].psrc + "\t\t" + element[1].hwsrc)
             result.append(element[1].psrc, element[1].hwsrc) #psrc = protocol source (= IP adres); hwsrc = hardware source (=MAC adres) (van de potentiële targets)
+    print(result)
     if result != []:
         return result
     else:
