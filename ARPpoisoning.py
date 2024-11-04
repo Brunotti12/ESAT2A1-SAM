@@ -22,18 +22,19 @@ def get_ip_and_mac():
     ethernet_frame = Ether(dst='ff:ff:ff:ff:ff:ff') #maakt een ethernet frame met als destination het 'broadcast adress' (='ff:ff:ff:ff:ff:ff'), dit is een speciaal MAC adres waar ALLE devices op een netwerk naar luisteren
     packet = broadcast / arp_request #combineert het frame met de request
 
-    answers_list = srp(packet, timeout=3, verbose=False)[0] #srp --> Send and Receive Packets
+    answers_list = srp(packet, timeout=20, verbose=False)[0] #srp --> Send and Receive Packets
     result=[]
 
-    print("IP\t
+    print("IP\t\t\tMAc adress\n------------------------------------------")
     for element in answers_list: #loop over alle packets met antwoorden; 'element' is dan een lijst met eerst de verzonden info, dan de ontvangen antwoorden
         if element[1].psrc != local_ip:  # deze lijn zorgt ervoor dat de packets die van ons eigen device komen genegeerd worden (.psrc neemt het IP adress van waar de data komt)
-            
-            
-            return element[1].psrc, element[1].hwsrc #psrc = protocol source (= IP adres); hwsrc = hardware source (=MAC adres) (van de potentiële targets)
-    
-    print("Failed, not connected")
-    return None, None
+            print(element[1].psrc + "\t\t" + element[1].hwsrc)
+            result.append(element[1].psrc, element[1].hwsrc) #psrc = protocol source (= IP adres); hwsrc = hardware source (=MAC adres) (van de potentiële targets)
+    if result != []:
+        return result
+    else:
+        print("Failed, not connected")
+        return None, None
 
 # Settings for ARP poisoning
 victim_ip = "192.168.1.100"  # IP address of the victim
