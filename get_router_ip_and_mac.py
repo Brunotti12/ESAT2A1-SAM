@@ -12,6 +12,3 @@ def router_ip_mac():
         return (ip, router_mac)
     except subprocess.CalledProcessError:
         return "Failed"
-    
-mac = router_ip_mac()
-print(mac[1])
