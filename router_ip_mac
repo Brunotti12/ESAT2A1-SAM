@@ -2,7 +2,7 @@ import subprocess
 import re
 
 #geeft terug: tuple(ip, mac) van de router
-def router_ip_mac():
+def get_router_ip_mac():
     try:
         result = subprocess.check_output("arp -a", shell=True).decode()
         ip = result[20:32] #om dit te finetunen hebben we de naam van de raspberry pi nodig
