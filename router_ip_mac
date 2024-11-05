@@ -1,14 +1,14 @@
 import subprocess
 import re
 
-#geeft terug: tuple(ip, mac) van de router
 def get_router_ip_mac():
     try:
         result = subprocess.check_output("arp -a", shell=True).decode()
-        ip = result[20:32] #om dit te finetunen hebben we de naam van de raspberry pi nodig
-        message = re.search(rf" at ", result)
-        index = message.span()[1]
-        router_mac = result[index: index + 17]
-        return (ip, router_mac)
+        index = re.search(rf"Zenbook.mshome.net ", result).span()[1] #vul de naam van het toestel in ipv Zenbook.mshome.net 
+        router_ip = result[index + 1: index + 13]
+        router_mac = result[index + 18: index + 35]
+        return (router_ip, router_mac)
     except subprocess.CalledProcessError:
         return "Failed"
+    except AttributeError:
+        return "Wrong device name"
