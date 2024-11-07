@@ -1,6 +1,5 @@
 from scapy.all import ARP, Ether, srp
 import subprocess
-import re
 
 def get_router_ip():
     try:
