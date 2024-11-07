@@ -1,7 +1,7 @@
 from scapy.all import ARP, Ether, send, conf
 import time
-from router_ip_mac import get_router_ip
-from sniffer import get_target_ip, get_mac
+from router_ip_mac import get_router_ip, get_mac
+from sniffer import get_target_ip
 
 # Disable Scapy's SSL verification
 conf.verb = 0  # Disable verbose output
