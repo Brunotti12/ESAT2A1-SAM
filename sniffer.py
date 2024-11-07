@@ -24,6 +24,8 @@ def wep_decrypt(packet):
     wep_key = bytes.fromhex("0000000000")
 
     #print("found one")
+    if packet.haslayer(Dot11):
+        print('WEP', packet.FCfield & 0b01000000 != 0)
 
     if packet.haslayer(Dot11WEP):
         iv = packet[Dot11WEP].iv
@@ -32,6 +34,7 @@ def wep_decrypt(packet):
         encrypted_payload = packet[Dot11WEP].wepdata
 
         decrypted_data = rc4(rc4_key, encrypted_payload)
+        print('Decrypted', decrypted_data)
 
         data, icv = decrypted_data[:-4], decrypted_data[-4:]
 
