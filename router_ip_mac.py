@@ -5,8 +5,8 @@ def get_router_ip_mac():
     try:
         result = subprocess.check_output("arp -a", shell=True).decode()
         index = re.search(rf"edimax.setup ", result).span()[1] #vul de naam van het toestel in ipv Zenbook.mshome.net 
-        router_ip = result[index + 1: index + 13]
-        router_mac = result[index + 18: index + 35]
+        router_ip = result[index + 1: index + 12]
+        router_mac = result[index + 17: index + 34]
         return (router_ip, router_mac)
     except subprocess.CalledProcessError:
         return "Failed"
