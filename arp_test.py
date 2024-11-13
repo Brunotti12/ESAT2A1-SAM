@@ -1,4 +1,4 @@
-from ARPpoison import ARP_poison
+from ARPpoisoning import ARP_poison
 import multiprocessing
 
 e = multiprocessing.Event()
