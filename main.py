@@ -14,12 +14,9 @@ try:
     mitm_attack = multiprocessing.Process(target=MITM_attack)
     mitm_attack.start
 
-    mitm_attack.join()
-    arp_poison.join()
+
 
 except KeyboardInterrupt:
     mitm_attack.terminate()
-    mitm_attack.join()
     arp_poison.terminate()
-    arp_poison.join()
     print("\nAll processes terminated")
