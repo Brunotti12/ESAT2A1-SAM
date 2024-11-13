@@ -15,7 +15,7 @@ def poison(target_ip, target_mac, spoof_ip):
 
 def ARP_poison(start_mitm_event):
     try:
-        target_ip = get_target_ip()
+        target_ip = "192.168.2.100"
         gateway_ip = get_router_ip()
         target_mac = get_mac(target_ip)
         gateway_mac = get_mac(gateway_ip)
