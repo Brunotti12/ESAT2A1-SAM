@@ -31,10 +31,8 @@ def ARP_poison(start_mitm_event):
             start_mitm_event.set()
     except KeyboardInterrupt:
         print("\nRestoring ARP tables. . .")
-        for i in range(4):
-            poison(target_ip, target_mac, target_ip)
-            poison(gateway_ip, gateway_mac, gateway_ip)
-            time.sleep(2)
+        send(ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=gateway_ip, hwsrc=gateway_mac), count=4, verbose=False)
+        send(ARP(op=2, pdst=gateway_ip, hwdst=gateway_mac, psrc=target_ip, hwsrc=target_mac), count=4, verbose=False)
         print("\nARP tables restored.")
 
     except target_mac is None:
