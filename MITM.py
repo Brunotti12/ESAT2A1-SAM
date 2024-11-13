@@ -1,10 +1,10 @@
 from scapy.all import *
 from sniffer import get_target_ip
-from router_ip_mac import get_gateway_ip, get_mac
+from router_ip_mac import get_router_ip, get_mac
 
-target_ip = get_target_ip()
+target_ip = "192.168.2.100"
 target_mac = get_mac(target_ip)
-gateway_ip = get_gateway_ip()
+gateway_ip = get_router_ip()
 gateway_mac = get_mac(gateway_ip)
 my_mac = open(f"/sys/class/net/eth0/address").read().strip()
 
