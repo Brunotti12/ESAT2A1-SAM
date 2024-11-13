@@ -1,5 +1,4 @@
 from scapy.all import *
-from sniffer import get_target_ip
 from router_ip_mac import get_router_ip, get_mac
 
 target_ip = "192.168.2.100"
