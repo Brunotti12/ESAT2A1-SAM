@@ -32,8 +32,10 @@ def forward_packet(packet):
             
         if packet[Ether].src == server_mac and packet[IP].dst == victim_ip and packet[Ether].dst == my_mac:
             packet2[Ether].dst = victim_mac
+            packet2[Ether].dst = victim_mac
             sendp(packet2)
         elif packet[Ether].src == victim_mac and packet[IP].dst == server_ip and packet[Ether].dst == my_mac:
+            packet2[Ether].dst = server_mac
             packet2[Ether].dst = server_mac
             sendp(packet2)
 
